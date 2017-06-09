@@ -1,0 +1,30 @@
+[Defines]
+  INF_VERSION                    = 1.25
+  BASE_NAME                      = GrThread
+  FILE_GUID                      = f5d03489-0536-4323-a4cc-7f79c5a60754
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain
+
+[Sources]
+  Context.s
+  Green.c
+  Mutex.c
+  main.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  
+[LibraryClasses]
+  UefiApplicationEntryPoint
+  UefiLib
+  
+[Guids]
+
+[Ppis]
+
+[Protocols]
+
+[FeaturePcd]
+
+[Pcd]

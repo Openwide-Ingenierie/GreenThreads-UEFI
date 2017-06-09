@@ -1,4 +1,5 @@
-#include <Mutex.h>
+#include "Green.h"
+#include "Mutex.h"
 
 VOID
 MutexInit(MUTEX* Mut)
@@ -7,9 +8,11 @@ MutexInit(MUTEX* Mut)
 }
 
 VOID
-__attribute__ ((noinline)) MutexLock(MUTEX* Mut)
+MutexLock(MUTEX* Mut)
 {
-  while(__atomic_test_and_set(&Mut->Taken, 0));
+  while(__atomic_test_and_set(&Mut->Taken, 0)){
+    ThreadYield();
+  };
 }
 
 VOID

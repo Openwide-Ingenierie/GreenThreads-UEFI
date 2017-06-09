@@ -1,24 +1,16 @@
 #include "Green.h"
-#define MAX_THREAD 10
+#define MAX_THREAD 64
 
 volatile CONTEXT Main;
 volatile CONTEXT* Contexts[MAX_THREAD];
 volatile UINTN RunningId = 0;
 volatile EFI_EVENT* Schedule = NULL;
-EFI_TIME Prev;
 
 VOID EFIAPI SwitchContext(volatile CONTEXT*, volatile CONTEXT*);
 
 VOID EFIAPI
 CChangeContext(IN EFI_EVENT Event, IN VOID* Args)
 {
-  EFI_TIME Now;
-  gRT->GetTime(&Now, NULL);
-  UINT32 Elapsed =
-    (Now .Minute * 60 + Now .Second) -
-    (Prev.Minute * 60 + Prev.Second);
-  Print(L"Elapsed: %d secondes\n", Elapsed);
-  Prev = Now;
   UINTN NextRunning = (RunningId+1) % MAX_THREAD;
   while(Contexts[NextRunning] == NULL ||
 	Contexts[NextRunning]->Stat != THREAD_RUNNABLE){
@@ -60,8 +52,7 @@ ThreadInitialize(VOID)
     Print(L"Error creating the event: %d\n", Status);
   }
   // 40000 (* 100 ns = 4 000 000 ns = 4 ms)
-  Status = gBS->SetTimer(*Schedule, TimerPeriodic, 100000000);
-  gRT->GetTime(&Prev, NULL);
+  Status = gBS->SetTimer(*Schedule, TimerPeriodic, 40000);
   if(EFI_ERROR(Status)){
     Print(L"Error setting the timer : %d\n", Status);
   }
@@ -100,7 +91,8 @@ ThreadCreate(CONTEXT* Ctx, GREEN_FUNCTION Function, VOID* Param)
   // Context id
   UINTN Id = GetFreshId();
   if(Id == 0){
-    Print(L"TODO: return Error\n");
+    Print(L"Error getting a fresh id\n");
+    FreePool(Ctx->StackBase);
     return;
   }
   Ctx->Id = Id;
@@ -129,7 +121,9 @@ ThreadJoin(CONTEXT* Ctx, VOID** Return)
     ThreadFinish(Ctx, Return);
   } else {
     // Wait the thread to finish
-    while(Ctx->Stat != THREAD_FINISHED);
+    while(Ctx->Stat != THREAD_FINISHED){
+      ThreadYield();
+    }
     ThreadFinish(Ctx, Return); 
   }
 }
@@ -142,7 +136,9 @@ ThreadWrapper(CONTEXT* Ctx, GREEN_FUNCTION Function, VOID* Param)
   Ctx->Return = Return;
   Ctx->Stat = THREAD_FINISHED;
   // Wait for a thread to join this one
-  for(;;);
+  for(;;){
+    ThreadYield();
+  }
 }
 
 VOID

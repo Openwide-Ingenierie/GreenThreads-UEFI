@@ -65,7 +65,7 @@ UefiMain(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
   CONST UINT32 ScreenWidth  = Gop->Mode->Info->HorizontalResolution;
   CONST UINT32 GameWidth  = ScreenWidth / CELLSIZE;
   
-  CONTEXT thread1;
+  GTHREAD thread1;
   MUTEX lock;
   MutexInit(&lock);
   ThreadInitialize();

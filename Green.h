@@ -25,6 +25,8 @@ typedef struct{
   UINTN Id;
 } CONTEXT;
 
+typedef CONTEXT GTHREAD;
+
 typedef VOID* (*GREEN_FUNCTION)(VOID*);
 
 VOID ThreadInitialize(VOID);

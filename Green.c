@@ -44,7 +44,7 @@ ThreadInitialize(VOID)
 
   EFI_STATUS Status = gBS->CreateEvent(EVT_TIMER |
 				       EVT_NOTIFY_SIGNAL,
-				       TPL_NOTIFY,
+				       TPL_CALLBACK,
 				       CChangeContext,
 				       NULL,
 				       (EFI_EVENT*) Schedule);
